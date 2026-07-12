@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.telemost/telemost-mcp-server",
   "description": "Telegram channel analytics and statistics for AI agents, pay-per-call in USDC via x402.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "repository": {
     "url": "https://github.com/slava01011910-ops/telemost-mcp-server",
     "source": "github"
@@ -18,7 +18,7 @@
     {
       "registryType": "npm",
       "identifier": "telemost-mcp-server",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         { "name": "EVM_PRIVATE_KEY", "description": "Base (EVM) wallet private key (0x...) that funds x402 payments. One of EVM/SVM required for paid tools.", "isRequired": false, "isSecret": true },
