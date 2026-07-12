@@ -1,0 +1,43 @@
+# Manual-trigger publish of the npm package `telemost-mcp-server`.
+# Owner-gated: runs ONLY on manual dispatch (never on push). Publishes via npm Trusted Publishing (OIDC) —
+# NO token, NO local 2FA/OTP. Prereq (owner, one-time): npm Trusted Publishing configured for the package
+# pointing at THIS repo + this workflow file name (npmjs.com -> package -> Settings -> Trusted Publisher).
+#
+# OIDC requirements:
+#   1) npm CLI >= 11.5.1 — Node's bundled npm is older, so we `npm install -g npm@latest` first.
+#   2) NO NODE_AUTH_TOKEN on the publish step — an (empty) token makes setup-node write an .npmrc that
+#      forces token auth and shadows OIDC. Tokenless OIDC needs the env absent.
+#   3) Provenance is ON — this repo is public, so npm/sigstore accepts the provenance attestation.
+name: publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (pack only, do NOT publish)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write   # required for npm provenance (OIDC)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+      - name: Ensure npm >= 11.5.1 (Trusted Publishing / OIDC)
+        run: npm install -g npm@latest && npm --version
+      - run: npm ci
+      - run: npm audit --omit=dev
+      - run: npm run build
+      - run: npm pack --dry-run
+      - name: Publish (Trusted Publishing / OIDC, with provenance)
+        if: ${{ inputs.dry_run == false }}
+        # No NODE_AUTH_TOKEN -> OIDC only. Provenance ON (public repo).
+        run: npm publish --access public --provenance
