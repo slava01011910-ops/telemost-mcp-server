@@ -5,7 +5,7 @@ import { ListResourcesRequestSchema, ListResourceTemplatesRequestSchema, ListPro
 import { z, type ZodTypeAny } from "zod";
 
 // Keep in sync with package.json "version" (server info version reported to clients/scanners).
-const SERVER_VERSION = "0.2.0";
+const SERVER_VERSION = "0.2.1";
 
 // ── telemost-mcp-server ───────────────────────────────────────────────────────────────────────────
 // A stdio MCP bridge to the Telemost x402 HTTP API. Tools are generated at startup from the live

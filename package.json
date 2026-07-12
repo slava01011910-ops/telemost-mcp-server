@@ -1,17 +1,36 @@
 {
   "name": "telemost-mcp-server",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "mcpName": "io.telemost/telemost-mcp-server",
   "description": "MCP server (stdio) exposing the Telemost x402 Telegram-analytics API as pay-per-call MCP tools. Payment is made from the agent's own USDC wallet via x402.",
-  "keywords": ["mcp", "x402", "telegram", "analytics", "usdc", "model-context-protocol"],
+  "keywords": [
+    "mcp",
+    "x402",
+    "telegram",
+    "analytics",
+    "usdc",
+    "model-context-protocol"
+  ],
   "license": "MIT",
-  "repository": { "type": "git", "url": "git+https://github.com/slava01011910-ops/telemost-mcp-server.git" },
-  "bugs": { "url": "https://github.com/slava01011910-ops/telemost-mcp-server/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slava01011910-ops/telemost-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/slava01011910-ops/telemost-mcp-server/issues"
+  },
   "homepage": "https://github.com/slava01011910-ops/telemost-mcp-server#readme",
   "type": "module",
-  "bin": { "telemost-mcp-server": "dist/index.js" },
-  "files": ["dist", "README.md"],
-  "engines": { "node": ">=18" },
+  "bin": {
+    "telemost-mcp-server": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
