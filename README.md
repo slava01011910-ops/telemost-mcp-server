@@ -54,8 +54,8 @@ Edit `claude_desktop_config.json`, then fully quit and reopen Claude Desktop (co
       "args": ["-y", "telemost-mcp-server"],
       "env": {
         "EVM_PRIVATE_KEY": "0xYOUR_BASE_WALLET_KEY",
-        "MAX_PAYMENT_USDC": "0.5",
-        "SESSION_MAX_USDC": "5"
+        "MAX_PAYMENT_USDC": "2.5",
+        "SESSION_MAX_USDC": "10"
       }
     }
   }
@@ -72,8 +72,8 @@ Edit `claude_desktop_config.json`, then fully quit and reopen Claude Desktop (co
       "args": ["/c", "npx", "-y", "telemost-mcp-server"],
       "env": {
         "EVM_PRIVATE_KEY": "0xYOUR_BASE_WALLET_KEY",
-        "MAX_PAYMENT_USDC": "0.5",
-        "SESSION_MAX_USDC": "5"
+        "MAX_PAYMENT_USDC": "2.5",
+        "SESSION_MAX_USDC": "10"
       }
     }
   }
@@ -137,7 +137,7 @@ Response text from Telegram (titles, posts, descriptions) is returned **verbatim
 | `EVM_PRIVATE_KEY` | one of EVM/SVM | — | Base (EVM) wallet key (`0x…`). Funds x402 payments. |
 | `SVM_PRIVATE_KEY` | one of EVM/SVM | — | Solana wallet secret key (base58). |
 | `TELEMOST_BASE_URL` | no | `https://api.telemost.io` | API base URL. |
-| `MAX_PAYMENT_USDC` | no | `1` | Per-call price ceiling (USD). A call is refused **before signing** if the price exceeds this. |
+| `MAX_PAYMENT_USDC` | no | `2.5` | Per-call price ceiling (USD); the default covers every price in the catalog. A call is refused **before signing** if the price exceeds this. |
 | `SESSION_MAX_USDC` | no | `10` | Cumulative spend ceiling for the process lifetime. |
 | `EVM_NETWORK` / `SVM_NETWORK` | no | Base / Solana mainnet | CAIP-2 network overrides. |
 | `SOLANA_RPC_URL` | no | mainnet-beta | RPC for the Solana signer. |
