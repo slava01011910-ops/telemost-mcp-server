@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.telemost/telemost-mcp-server",
   "description": "Telegram channel analytics and statistics for AI agents, pay-per-call in USDC via x402.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "repository": {
     "url": "https://github.com/slava01011910-ops/telemost-mcp-server",
     "source": "github"
@@ -18,13 +18,13 @@
     {
       "registryType": "npm",
       "identifier": "telemost-mcp-server",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         { "name": "EVM_PRIVATE_KEY", "description": "Base (EVM) wallet private key (0x...) that funds x402 payments. One of EVM/SVM required for paid tools.", "isRequired": false, "isSecret": true },
         { "name": "SVM_PRIVATE_KEY", "description": "Solana wallet secret key (base58) that funds x402 payments. One of EVM/SVM required for paid tools.", "isRequired": false, "isSecret": true },
         { "name": "TELEMOST_BASE_URL", "description": "API base URL. Defaults to https://api.telemost.io.", "isRequired": false, "isSecret": false },
-        { "name": "MAX_PAYMENT_USDC", "description": "Per-call price ceiling in USD (default 1). Calls above this are refused before signing.", "isRequired": false, "isSecret": false },
+        { "name": "MAX_PAYMENT_USDC", "description": "Per-call price ceiling in USD (default 2.5, covers the full catalog). Calls above this are refused before signing.", "isRequired": false, "isSecret": false },
         { "name": "SESSION_MAX_USDC", "description": "Cumulative spend ceiling per process lifetime in USD (default 10).", "isRequired": false, "isSecret": false }
       ]
     }
