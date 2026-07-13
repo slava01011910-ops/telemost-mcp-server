@@ -3,9 +3,10 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { ListResourcesRequestSchema, ListResourceTemplatesRequestSchema, ListPromptsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { z, type ZodTypeAny } from "zod";
+import { checkPolicy, extractAccepts } from "./policy.js";
 
 // Keep in sync with package.json "version" (server info version reported to clients/scanners).
-const SERVER_VERSION = "0.2.1";
+const SERVER_VERSION = "0.2.2";
 
 // ── telemost-mcp-server ───────────────────────────────────────────────────────────────────────────
 // A stdio MCP bridge to the Telemost x402 HTTP API. Tools are generated at startup from the live
@@ -17,10 +18,11 @@ const SERVER_VERSION = "0.2.1";
 const log = (...a: unknown[]): void => { console.error("[telemost-mcp]", ...a); };
 
 const BASE = (process.env.TELEMOST_BASE_URL ?? "https://api.telemost.io").replace(/\/+$/, "");
-const MAX_PAYMENT_USDC = Number(process.env.MAX_PAYMENT_USDC ?? 1);       // per-call ceiling (USD)
+// Per-call ceiling (USD). Default 2.5 covers every price in the catalog (max $2.10) so no paid tool is
+// dead out of the box; tighten it via the env var if you want a stricter cap.
+const MAX_PAYMENT_USDC = Number(process.env.MAX_PAYMENT_USDC ?? 2.5);
 const SESSION_MAX_USDC = Number(process.env.SESSION_MAX_USDC ?? 10);      // cumulative session ceiling (USD)
 const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com";
-const USDC_DECIMALS = 6;
 
 let sessionSpent = 0;
 
@@ -110,17 +112,6 @@ async function fetchOperations(): Promise<OpenApiOp[]> {
   return ops;
 }
 
-// Policy check on the 402 accepts BEFORE signing: amount ≤ per-call & session ceilings, network allowed.
-function checkPolicy(accepts: Array<Record<string, unknown>>, allowedNetworks: Set<string>): { ok: true; amountUsd: number } | { ok: false; reason: string } {
-  const affordable = accepts.filter((a) => allowedNetworks.has(String(a.network)));
-  if (affordable.length === 0) return { ok: false, reason: `no wallet for any offered network (${accepts.map((a) => a.network).join(", ")})` };
-  const amounts = affordable.map((a) => Number(a.maxAmountRequired ?? a.amount ?? 0) / 10 ** USDC_DECIMALS);
-  const minUsd = Math.min(...amounts);
-  if (minUsd > MAX_PAYMENT_USDC) return { ok: false, reason: `price $${minUsd} exceeds MAX_PAYMENT_USDC $${MAX_PAYMENT_USDC}` };
-  if (sessionSpent + minUsd > SESSION_MAX_USDC) return { ok: false, reason: `session cap $${SESSION_MAX_USDC} would be exceeded` };
-  return { ok: true, amountUsd: minUsd };
-}
-
 function buildUrl(op: OpenApiOp, args: Record<string, unknown>): { url: string; init: RequestInit } {
   if (op.method === "get") {
     const qs = new URLSearchParams();
@@ -171,8 +162,14 @@ async function main(): Promise<void> {
         // Preflight (free 402) → policy check BEFORE signing.
         const probe = await fetch(url, init);
         if (probe.status === 402) {
-          const body = (await probe.json().catch(() => ({}))) as { accepts?: Array<Record<string, unknown>> };
-          const verdict = checkPolicy(body.accepts ?? [], networks);
+          // x402 v2 returns the challenge in the `payment-required` header (base64 JSON); body may be {}.
+          const body = await probe.json().catch(() => ({}));
+          const accepts = extractAccepts(probe.headers.get("payment-required"), body);
+          const verdict = checkPolicy(accepts, networks, {
+            maxPerCallUsd: MAX_PAYMENT_USDC,
+            sessionCapUsd: SESSION_MAX_USDC,
+            sessionSpentUsd: sessionSpent,
+          });
           if (!verdict.ok) return errResult(`payment policy blocked this call: ${verdict.reason}`);
           const paid = await payFetch(url, init);
           if (!paid.ok && paid.status !== 200) return errResult(`paid request failed (HTTP ${paid.status})`);
